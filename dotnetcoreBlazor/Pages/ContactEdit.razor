@@ -1,0 +1,49 @@
+@using dotnetcoreBlazor.Models
+@using System.Net.Http
+@page "/editcontact/{id:int}"
+@inject HttpClient Http
+@inject IUriHelper UriHelper
+
+<h2>Edit Contact @id</h2>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form>
+            <div class="form-group">
+                <label for="Name" class="control-label">Email</label>
+                <input for="Name" class="form-control" bind="@contact.email" />
+            </div>
+            <div class="form-group">
+                <label for="Address" class="control-label">Phone Number</label>
+                <input for="Address" class="form-control" bind="@contact.phone" />
+            </div>
+            
+            <div class="form-group">
+                <input type="button" class="btn btn-default" onclick="@(async () => await CreateContact())" value="Save" />
+                <input type="button" class="btn" onclick="@Cancel" value="Cancel" />
+            </div>
+        </form>
+    </div>
+</div>
+@functions {
+    [Parameter]  
+    int id { get; set; }
+
+    dotnetcoreBlazor.Models.Contact contact = new dotnetcoreBlazor.Models.Contact();
+
+    protected override async Task OnInitAsync()
+    {
+        contact = await Http.GetJsonAsync<dotnetcoreBlazor.Models.Contact>("/api/Contacts/Details/"+ id);
+    }
+
+    protected async Task CreateContact()
+    {
+        await Http.SendJsonAsync(HttpMethod.Put, "/api/Contacts/Edit", contact);
+        UriHelper.NavigateTo("/contact");
+    }
+
+    void Cancel()
+    {
+        UriHelper.NavigateTo("/contact");
+    }
+}  

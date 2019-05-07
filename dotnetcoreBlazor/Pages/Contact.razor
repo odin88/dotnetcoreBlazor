@@ -1,0 +1,63 @@
+
+@using dotnetcoreBlazor.Models
+@using System.Net.Http
+@page "/contact"
+@inject HttpClient Http
+@inject IUriHelper UriHelper
+
+<h1>Contact Details</h1>
+<p>
+    <a href="/addcontact">Create New Contact</a>
+</p>
+@if (contactList == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class='table'>
+        <thead>
+            <tr>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var contact in contactList)
+            {
+                <tr>
+                    <td>@contact.email</td>
+                    <td>@contact.phone</td>
+                    <td>
+                        <a href='#' onclick="@(async () => await Edit(contact.ID))" class="btn btn-info">Edit</a>
+                        <a href='#' onclick="@(async () => await Delete(contact.ID))" class="btn btn-danger">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+@functions {
+    [Parameter]  
+    int id { get; set; } 
+
+    dotnetcoreBlazor.Models.Contact[] contactList;
+
+    protected override async Task OnInitAsync()
+    {
+        contactList = await Http.GetJsonAsync<dotnetcoreBlazor.Models.Contact[]>("/api/Contacts/Get");
+    }
+
+    protected async Task Delete(int id)  
+    {  
+        await Http.DeleteAsync("api/Contacts/Delete/" + id);  
+        UriHelper.NavigateTo("/contact");  
+    }
+
+    protected async Task Edit(int id)  
+    {          
+        UriHelper.NavigateTo("/editcontact/" + id);  
+    }
+
+}
